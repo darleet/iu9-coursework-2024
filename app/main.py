@@ -6,7 +6,6 @@ from app.core.config import settings
 
 def get_application() -> FastAPI:
     _app = FastAPI(title=settings.PROJECT_NAME)
-
     _app.add_middleware(
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
@@ -14,7 +13,6 @@ def get_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
     return _app
 
 
