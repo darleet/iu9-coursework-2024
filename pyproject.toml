@@ -9,12 +9,58 @@ readme = "README.md"
 python = "^3.12"
 fastapi = "^0.115.6"
 uvicorn = "^0.34.0"
+python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
 manage-fastapi = "^1.1.1"
 setuptools = "^75.6.0"
+mypy = "^1.14.0"
+ruff = "^0.8.4"
+black = "^24.10.0"
+isort = "^5.13.2"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+extend-exclude = 'env|.env|venv|.venv'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = '*.*'
+ignore_missing_imports = true
+check_untyped_defs = true
+disable_error_code = "ignore-without-code"
+
+[tool.ruff]
+lint.select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "I001", # isort
+    "N",  #  pep8-naming
+    "W292",  # no newline at end of file
+]
+lint.ignore = [
+    "E501",  # line too long, handled by black
+    "E731",  # do not assign a lambda expression, use a def
+    "B008",  # do not perform function calls in argument defaults
+    "B009",  # Do not call `getattr` with a constant attribute value
+    "B010",  # Do not call `setattr` with a constant attribute value
+    "C401",  # Unnecessary generator (rewrite as a `set` comprehension)
+    "C408",  # unnecessary `dict` call
+    "C901",  # too complex
+    "N802",  # function name should be lowercase
+]
+fix = true
+lint.unfixable = ["E731", "F401"]
