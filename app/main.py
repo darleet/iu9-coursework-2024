@@ -14,13 +14,24 @@ def get_application() -> FastAPI:
         return _app
 
     _app = FastAPI(title=settings.PROJECT_NAME)
-    _app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+
+    if settings.CORS_ENABLED:
+        _app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    else:
+        _app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
     _app.include_router(router)
 
     return _app

@@ -3,6 +3,7 @@ from pydantic import AnyHttpUrl, BaseSettings, validator
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "coursework"
+    CORS_ENABLED: bool = True
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = []
     APP_HOST: str = "localhost"
     APP_PORT: int = 8000

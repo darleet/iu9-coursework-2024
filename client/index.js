@@ -45,7 +45,7 @@ document.getElementById("submit-route").onclick = async function() {
     });
 
     // Send route data to the FastAPI backend
-    const response = await fetch(backendURL, {
+    const response = await fetch(backendURL + "/route", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
