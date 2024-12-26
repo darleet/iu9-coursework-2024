@@ -1,30 +1,49 @@
-import folium
+import logging
+
 import requests
-from folium import Map
+from starlette.status import HTTP_200_OK
+
+from app.schemas import ExternalMeteoResponseErrorSchema, ExternalMeteoResponseSchema
+
+logger = logging.getLogger(__name__)
 
 
-def create_map() -> Map:
-    map_center = [61.5240, 105.3188]  # центр России
-    folium_map = folium.Map(location=map_center, zoom_start=4)
+async def check_route(coordinates: list) -> tuple[list, list]:
+    ice_probabilities = []
+    visibility_scores = []
 
-    cities = [
-        {"name": "Москва", "latitude": 55.7558, "longitude": 37.6173},
-        {"name": "Санкт-Петербург", "latitude": 59.9343, "longitude": 30.3351},
-        {"name": "Екатеринбург", "latitude": 56.8389, "longitude": 60.6057},
-    ]
-
-    for city in cities:
+    for latitude, longitude in coordinates:
         response = requests.get(
-            f"https://api.open-meteo.com/v1/forecast?latitude={city['latitude']}"
-            f"&longitude={city['longitude']}&hourly=temperature_2m"
+            "https://api.open-meteo.com/v1/forecast",
+            params={
+                "latitude": latitude,
+                "longitude": longitude,
+                "hourly": "temperature_2m,humidity_2m,visibility",
+            },
         )
-        data = response.json()
-        temp = data["hourly"]["temperature_2m"][0]
 
-        folium.Marker(
-            location=[city["latitude"], city["longitude"]],  # type: ignore
-            popup=f"{city['name']}: {temp}°C",
-            icon=folium.Icon(color="blue", icon="info-sign"),
-        ).add_to(folium_map)
+        data: ExternalMeteoResponseSchema | ExternalMeteoResponseErrorSchema
 
-    return folium_map
+        if response.status_code != HTTP_200_OK:
+            data = ExternalMeteoResponseErrorSchema(**response.json())
+            raise Exception(data.reason)
+
+        data = ExternalMeteoResponseSchema(**response.json())
+
+        temperature = data.hourly.temperature_2m[0]
+        humidity = data.hourly.humidity_2m[0]
+        visibility = data.hourly.visibility[0]
+
+        # Calculate ice formation probability on a scale of 0 to 100
+        ice_probability = max(
+            0, min(100, (0 - temperature) * 2 + (humidity - 80) * 0.5)
+        )
+        ice_probabilities.append(ice_probability)
+
+        # Calculate visibility score on a scale of 0 to 100
+        visibility_score = max(
+            0, min(100, (visibility / 1000) * 100)
+        )
+        visibility_scores.append(visibility_score)
+
+    return ice_probabilities, visibility_scores
