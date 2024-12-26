@@ -1,6 +1,6 @@
 import logging
 
-import requests
+import grequests
 from starlette.status import HTTP_200_OK
 
 from app.schemas import ExternalMeteoResponseErrorSchema, ExternalMeteoResponseSchema
@@ -12,8 +12,8 @@ async def check_route(coordinates: list) -> tuple[list, list]:
     ice_probabilities = []
     visibility_scores = []
 
-    for latitude, longitude in coordinates:
-        response = requests.get(
+    requests = [
+        grequests.get(
             "https://api.open-meteo.com/v1/forecast",
             params={
                 "latitude": latitude,
@@ -21,7 +21,11 @@ async def check_route(coordinates: list) -> tuple[list, list]:
                 "hourly": "temperature_2m,relative_humidity_2m,visibility",
             },
         )
+        for latitude, longitude in coordinates
+    ]
+    responses = grequests.map(requests)
 
+    for response in responses:
         data: ExternalMeteoResponseSchema | ExternalMeteoResponseErrorSchema
 
         if response.status_code != HTTP_200_OK:
