@@ -1,47 +1,51 @@
-import logging
+import asyncio
 
-import grequests
+import aiohttp
 from pydantic.validators import Decimal
 from starlette.status import HTTP_200_OK
 
 from app.schemas import ExternalMeteoResponseErrorSchema, ExternalMeteoResponseSchema
 
-logger = logging.getLogger(__name__)
+
+async def fetch(url: str, params: dict) -> ExternalMeteoResponseSchema:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params) as response:
+            json_data = await response.json()
+            if response.status != HTTP_200_OK:
+                data = ExternalMeteoResponseErrorSchema(**json_data)
+                raise Exception(f"HTTP error {response.status}: {data.reason}")
+            return ExternalMeteoResponseSchema(**json_data)
 
 
 async def check_route(coordinates: list) -> tuple[list, list]:
     ice_probabilities = []
     visibility_scores = []
 
-    requests = [
-        grequests.get(
-            "https://api.open-meteo.com/v1/forecast",
-            params={
-                "latitude": latitude,
-                "longitude": longitude,
-                "hourly": "temperature_2m,relative_humidity_2m,visibility",
-            },
+    tasks = [
+        asyncio.create_task(
+            fetch(
+                "https://api.open-meteo.com/v1/forecast",
+                params={
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "hourly": "temperature_2m,relative_humidity_2m,visibility",
+                },
+            )
         )
         for latitude, longitude in coordinates
     ]
-    responses = grequests.map(requests)
+    responses = await asyncio.gather(*tasks)
 
+    response: ExternalMeteoResponseSchema
     for response in responses:
-        data: ExternalMeteoResponseSchema | ExternalMeteoResponseErrorSchema
-
-        if response.status_code != HTTP_200_OK:
-            data = ExternalMeteoResponseErrorSchema(**response.json())
-            raise Exception(data.reason)
-
-        data = ExternalMeteoResponseSchema(**response.json())
-
-        temperature = data.hourly.temperature_2m[0]
-        relative_humidity = data.hourly.relative_humidity_2m[0]
-        visibility = data.hourly.visibility[0]
+        temperature = response.hourly.temperature_2m[0]
+        relative_humidity = response.hourly.relative_humidity_2m[0]
+        visibility = response.hourly.visibility[0]
 
         # Calculate ice formation probability on a scale of 0 to 100
         ice_probability = max(
-            0, min(100, (0 - temperature) * 2 + (relative_humidity - 80) * Decimal("0.5"))
+            0,
+            min(100, (0 - temperature) * 2 + (relative_humidity - 80) * Decimal("0.5")),
         )
         ice_probabilities.append(ice_probability)
 
