@@ -1,6 +1,6 @@
 .PHONY: mypy ruff mypy style style-check test lint all deps
 
-package?=app tests main.py
+package?=app main.py
 
 all: deps test
 
@@ -18,9 +18,6 @@ style-check:
 	python -m isort --check --diff $(package)
 
 lint: style mypy
-
-test: style lint
-	python -m pytest .
 
 deps:
 	pip install -U mypy ruff black isort

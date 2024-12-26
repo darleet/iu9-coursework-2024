@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Визуализация природных явлений</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <style>
+        #map { height: 500px; }
+        .legend {
+            background: white;
+            padding: 10px;
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+        .legend .marker-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .legend .marker-item div {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+<h3>Нарисуйте ваш примерный маршрут на карте</h3>
+<div id="map"></div>
+<button id="submit-route">Подтвердить маршрут</button>
+<div id="result"></div>
+
+<script src="leaflet/leaflet.js"></script>
+<script src="leaflet/leaflet.draw.js"></script>
+<script src="index.js"></script>
+</body>
+</html>

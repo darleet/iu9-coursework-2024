@@ -21,7 +21,7 @@ class JSONErrorSchema(BaseModel):
 
 class HourlyData(BaseModel):
     temperature_2m: list
-    humidity_2m: list
+    relative_humidity_2m: list
     visibility: list
 
 
