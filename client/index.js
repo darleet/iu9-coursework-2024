@@ -1,3 +1,5 @@
+const backendURL = "http://localhost:8000";
+
 let map = L.map('map').setView([55.7558, 37.6173], 13);  // Moscow's coordinates
 
 // Add a tile layer to the map
@@ -43,7 +45,7 @@ document.getElementById("submit-route").onclick = async function() {
     });
 
     // Send route data to the FastAPI backend
-    const response = await fetch('http://localhost:8000/route', {
+    const response = await fetch(backendURL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
