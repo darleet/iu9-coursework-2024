@@ -1,28 +1,24 @@
 from pydantic import BaseModel
+from pydantic.validators import Decimal
 
 
 class RouteRequestSchema(BaseModel):
-    coordinates: list
+    coordinates: list[list[Decimal]]
 
 
 class RouteResponseSchema(BaseModel):
-    ice_probabilities: list
-    visibility_scores: list
+    ice_probabilities: list[Decimal]
+    visibility_scores: list[Decimal]
 
 
 class JSONResponseSchema(BaseModel):
     data: BaseModel
 
 
-class JSONErrorSchema(BaseModel):
-    status: str
-    reason: str
-
-
 class HourlyData(BaseModel):
-    temperature_2m: list
-    relative_humidity_2m: list
-    visibility: list
+    temperature_2m: list[Decimal]
+    relative_humidity_2m: list[Decimal]
+    visibility: list[Decimal]
 
 
 class ExternalMeteoResponseSchema(BaseModel):

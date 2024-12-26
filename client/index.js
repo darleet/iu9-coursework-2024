@@ -66,8 +66,8 @@ submitButton.onclick = async function() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ coordinates: routeCoordinates })
-    }).then(data => {
-        processResponse(data);
+    }).then(response => {
+        processResponse(response, routeCoordinates, markersLayerGroup);
     }).catch(error => {
         console.error('Error:', error);
     }).finally(() => {
@@ -83,7 +83,19 @@ async function fetchURL(url, options) {
     return await response.json();
 }
 
-function processResponse(response) {
+function drawMarker(latlng, radius, color, popupContent) {
+    let offsetLatLng = [latlng[0], latlng[1]];
+    return L.circleMarker(offsetLatLng, {
+        radius: radius,
+        fillColor: color,
+        color: color,
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.7
+    }).addTo(map).bindPopup(popupContent);
+}
+
+function processResponse(response, routeCoordinates, markersLayerGroup) {
     const data = response.data;
 
     let iceRisk = false;
@@ -105,35 +117,19 @@ function processResponse(response) {
         }
 
         const popupContent = `
-                <b>Координаты:</b> (${latlng[0].toFixed(5)}, ${latlng[1].toFixed(5)})<br>
-                <b>Вероятность гололедицы:</b> ${iceProb}%<br>
-                <b>Видимость:</b> ${visibility}%
-            `;
+            <b>Координаты:</b> (${latlng[0].toFixed(5)}, ${latlng[1].toFixed(5)})<br>
+            <b>Вероятность гололедицы:</b> ${iceProb}%<br>
+            <b>Видимость:</b> ${visibility}%
+        `;
 
-        // Display ice probabilities with slightly larger markers
+        // Display ice probability
         let color = getColor(iceProb);
-        let offsetLatLng = [latlng[0], latlng[1]];
-        let marker = L.circleMarker(offsetLatLng, {
-            radius: 10,
-            fillColor: color,
-            color: color,
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.7
-        }).addTo(map).bindPopup(popupContent);
+        let marker = drawMarker(latlng, 10, color, popupContent);
         markersLayerGroup.addLayer(marker);
 
-        // Display visibility scores with slightly smaller markers
+        // Display visibility
         color = getColor(100 - visibility);
-        offsetLatLng = [latlng[0], latlng[1]];
-        marker = L.circleMarker(offsetLatLng, {
-            radius: 6,
-            fillColor: color,
-            color: color,
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.7
-        }).addTo(map).bindPopup(popupContent);
+        marker = drawMarker(latlng, 6, color, popupContent);
         markersLayerGroup.addLayer(marker);
     });
 

@@ -1,6 +1,7 @@
 import logging
 
 import grequests
+from pydantic.validators import Decimal
 from starlette.status import HTTP_200_OK
 
 from app.schemas import ExternalMeteoResponseErrorSchema, ExternalMeteoResponseSchema
@@ -40,7 +41,7 @@ async def check_route(coordinates: list) -> tuple[list, list]:
 
         # Calculate ice formation probability on a scale of 0 to 100
         ice_probability = max(
-            0, min(100, (0 - temperature) * 2 + (relative_humidity - 80) * 0.5)
+            0, min(100, (0 - temperature) * 2 + (relative_humidity - 80) * Decimal("0.5"))
         )
         ice_probabilities.append(ice_probability)
 
