@@ -27,7 +27,7 @@ map.addControl(drawControl);
 
 // Event listener for when the user draws a route
 map.on('draw:created', function(e) {
-    let layer = e.propagatedFrom;
+    let layer = e.layer;
     drawnItems.addLayer(layer);
 });
 
