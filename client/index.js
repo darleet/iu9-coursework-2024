@@ -33,6 +33,16 @@ map.on('draw:created', function(e) {
 
 // Event listener for submitting the route
 document.getElementById('submit-route').onclick = async function() {
+    let markersLayerGroup = L.layerGroup().addTo(map);
+
+    document.getElementsByClassName("leaflet-draw-edit-remove").item(0)
+        .addEventListener('click', function() {
+            document.querySelector('[title="Clear all layers"]')
+                .addEventListener('click', function() {
+                    markersLayerGroup.clearLayers();
+                });
+        })
+
     let routeCoordinates = [];
     drawnItems.eachLayer(function(layer) {
         if (layer.getLatLngs) {
@@ -69,7 +79,7 @@ document.getElementById('submit-route').onclick = async function() {
         // Display ice probabilities with slightly larger markers
         let color = getColor(iceProb);
         let offsetLatLng = [latlng[0] + 0.0001, latlng[1] + 0.0001];
-        L.circleMarker(offsetLatLng, {
+        let marker = L.circleMarker(offsetLatLng, {
             radius: 10,
             fillColor: color,
             color: color,
@@ -77,11 +87,12 @@ document.getElementById('submit-route').onclick = async function() {
             opacity: 1,
             fillOpacity: 0.7
         }).addTo(map).bindPopup(popupContent);
+        markersLayerGroup.addLayer(marker);
 
         // Display visibility scores with slightly smaller markers
         color = getColor(100 - visibility);
         offsetLatLng = [latlng[0] - 0.0001, latlng[1] - 0.0001];
-        L.circleMarker(offsetLatLng, {
+        marker = L.circleMarker(offsetLatLng, {
             radius: 6,
             fillColor: color,
             color: color,
@@ -89,6 +100,7 @@ document.getElementById('submit-route').onclick = async function() {
             opacity: 1,
             fillOpacity: 0.7
         }).addTo(map).bindPopup(popupContent);
+        markersLayerGroup.addLayer(marker);
     });
 
     document.getElementById('result').innerHTML = `
