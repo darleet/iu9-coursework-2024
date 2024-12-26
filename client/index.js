@@ -1,4 +1,4 @@
-const backendURL = "http://localhost:8000";
+const backendURL = 'http://localhost:8000';
 
 let map = L.map('map').setView([55.7558, 37.6173], 13);  // Moscow's coordinates
 
@@ -32,7 +32,7 @@ map.on('draw:created', function(e) {
 });
 
 // Event listener for submitting the route
-document.getElementById("submit-route").onclick = async function() {
+document.getElementById('submit-route').onclick = async function() {
     let routeCoordinates = [];
     drawnItems.eachLayer(function(layer) {
         if (layer.getLatLngs) {
@@ -45,7 +45,7 @@ document.getElementById("submit-route").onclick = async function() {
     });
 
     // Send route data to the FastAPI backend
-    const response = await fetch(backendURL + "/route", {
+    const response = await fetch(backendURL + '/route', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -91,7 +91,7 @@ document.getElementById("submit-route").onclick = async function() {
         }).addTo(map).bindPopup(popupContent);
     });
 
-    document.getElementById("result").innerHTML = `
+    document.getElementById('result').innerHTML = `
                 Route submitted with ice probabilities and visibility scores.
             `;
 };
