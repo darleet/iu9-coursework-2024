@@ -36,9 +36,7 @@ const submitButton = document.getElementById("submit-route");
 
 // Event listener for submitting the route
 submitButton.onclick = async function() {
-    // Block the button
-    submitButton.disabled = true;
-    submitButton.innerText = "Обработка...";
+    blockButton(submitButton);
 
     let markersLayerGroup = L.layerGroup().addTo(map);
 
@@ -62,16 +60,31 @@ submitButton.onclick = async function() {
     });
 
     // Send route data to the FastAPI backend
-    const response = await fetch(backendURL + '/route', {
+    fetchURL(backendURL + '/route', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ coordinates: routeCoordinates })
+    }).then(data => {
+        processResponse(data);
+    }).catch(error => {
+        console.error('Error:', error);
+    }).finally(() => {
+        unblockButton(submitButton);
     });
+};
 
-    const resp = await response.json();
-    const data = resp.data;
+async function fetchURL(url, options) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+        throw new Error('HTTP error ' + response.status);
+    }
+    return await response.json();
+}
+
+function processResponse(response) {
+    const data = response.data;
 
     let iceRisk = false;
     let highIceRisk = false;
@@ -92,14 +105,14 @@ submitButton.onclick = async function() {
         }
 
         const popupContent = `
-                <b>Coordinate:</b> (${latlng[0].toFixed(5)}, ${latlng[1].toFixed(5)})<br>
-                <b>Ice Probability:</b> ${iceProb}%<br>
-                <b>Visibility:</b> ${visibility}%
+                <b>Координаты:</b> (${latlng[0].toFixed(5)}, ${latlng[1].toFixed(5)})<br>
+                <b>Вероятность гололедицы:</b> ${iceProb}%<br>
+                <b>Видимость:</b> ${visibility}%
             `;
 
         // Display ice probabilities with slightly larger markers
         let color = getColor(iceProb);
-        let offsetLatLng = [latlng[0] + 0.0001, latlng[1] + 0.0001];
+        let offsetLatLng = [latlng[0], latlng[1]];
         let marker = L.circleMarker(offsetLatLng, {
             radius: 10,
             fillColor: color,
@@ -112,7 +125,7 @@ submitButton.onclick = async function() {
 
         // Display visibility scores with slightly smaller markers
         color = getColor(100 - visibility);
-        offsetLatLng = [latlng[0] - 0.0001, latlng[1] - 0.0001];
+        offsetLatLng = [latlng[0], latlng[1]];
         marker = L.circleMarker(offsetLatLng, {
             radius: 6,
             fillColor: color,
@@ -138,7 +151,7 @@ submitButton.onclick = async function() {
     if (lowVisibility) {
         alert("На вашем маршруте есть участки с плохой видимостью!");
     }
-};
+}
 
 function getColor(value) {
     if (value <= 10) return '#00FF00';  // Very low (Green)
@@ -147,6 +160,16 @@ function getColor(value) {
     if (value <= 60) return '#FFA500';  // High (Orange)
     if (value <= 80) return '#FF4500';  // Very high (Dark Orange)
     return '#FF0000';  // Extreme (Red)
+}
+
+function blockButton(button) {
+    button.disabled = true;
+    button.innerText = "Пожалуйста, подождите...";
+}
+
+function unblockButton(button) {
+    button.disabled = false;
+    button.innerText = "Проанализировать маршрут";
 }
 
 // Adding a legend to the map
