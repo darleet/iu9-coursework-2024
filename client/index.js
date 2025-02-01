@@ -32,6 +32,14 @@ map.on('draw:created', function(e) {
     drawnItems.addLayer(layer);
 });
 
+async function getSnappedRoute(coordinates) {
+    const coordStr = coordinates.map(c => `${c[1]},${c[0]}`).join(';');
+    const osrmUrl = `https://router.project-osrm.org/match/v1/driving/${coordStr}?geometries=geojson`;
+    const response = await fetch(osrmUrl);
+    const data = await response.json();
+    return data;
+}
+
 const submitButton = document.getElementById("submit-route");
 
 // Event listener for submitting the route
@@ -73,6 +81,22 @@ submitButton.onclick = async function() {
     }).finally(() => {
         unblockButton(submitButton);
     });
+
+    try {
+        const osrmData = await getSnappedRoute(routeCoordinates);
+        if (osrmData.code === "Ok" && osrmData.matchings && osrmData.matchings.length > 0) {
+            const snappedRoute = osrmData.matchings[0].geometry;
+            L.geoJSON(snappedRoute, { style: { color: 'blue', weight: 4 } }).addTo(markersLayerGroup);
+        } else {
+            alert("Не удалось привязать маршрут к дорогам.");
+        }
+    } catch (error) {
+        console.error("Ошибка при получении привязанного маршрута:", error);
+        alert("Произошла ошибка при обработке маршрута.");
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerText = "Подтвердить";
+    }
 };
 
 async function fetchURL(url, options) {
