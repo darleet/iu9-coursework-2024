@@ -1,4 +1,5 @@
 const backendURL = 'http://localhost:8000';
+const osrmURL = 'https://router.project-osrm.org';
 
 let map = L.map('map').setView([55.7558, 37.6173], 10);  // Moscow's coordinates
 
@@ -34,8 +35,8 @@ map.on('draw:created', function(e) {
 
 async function getSnappedRoute(coordinates) {
     const coordStr = coordinates.map(c => `${c[1]},${c[0]}`).join(';');
-    const osrmUrl = `https://router.project-osrm.org/match/v1/driving/${coordStr}?geometries=geojson`;
-    const response = await fetch(osrmUrl);
+    const path = osrmURL + `/match/v1/car/${coordStr}?geometries=geojson`;
+    const response = await fetch(path);
     const data = await response.json();
     return data;
 }

@@ -1,0 +1,9 @@
+services:
+  # we can launch osrm locally with our own data
+  osrm:
+    image: osrm/osrm-backend
+    volumes:
+      - ./data:/data
+    ports:
+      - "5000:5000"
+    command: osrm-routed /data/russia-latest.osrm

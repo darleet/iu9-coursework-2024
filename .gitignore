@@ -146,3 +146,6 @@ cython_debug/
 
 # Text Editor
 .vscode
+
+### Other
+data/
