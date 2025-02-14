@@ -143,7 +143,7 @@ function processResponse(response, routeCoordinates, markersLayerGroup) {
 
         const popupContent = `
             <b>Координаты:</b> (${latlng[0].toFixed(5)}, ${latlng[1].toFixed(5)})<br>
-            <b>Вероятность гололедицы:</b> ${iceProb}%<br>
+            <b>Вероятность гололедицы:</b> ${iceProb}<br>
             <b>Видимость:</b> ${visibility}%
         `;
 

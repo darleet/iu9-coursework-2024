@@ -17,7 +17,7 @@ class JSONResponseSchema(BaseModel):
 
 class HourlyData(BaseModel):
     temperature_2m: list[Decimal]
-    relative_humidity_2m: list[Decimal]
+    dew_point_2m: list[Decimal]
     visibility: list[Decimal]
 
 
